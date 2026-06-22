@@ -1,3 +1,25 @@
+:root{
+    --cor-principal:#3498db;
+    --cor-segundaria:#2c3e50;
+    --espacamento:16px; 
+}
+ 
+*/ RESET SIMPLIS */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+/* BODY */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+ 
+/*=========================
+   FLEXBOX (MENU)
+=======================*/
+
+
 .cabecalho{
     display: flex;
     justify-content: space-between;

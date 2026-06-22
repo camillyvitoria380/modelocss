@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceBook - Painel de Reservas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #14b8a6;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+        }
+ 
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Lato', sans-serif; }
+        
+        body { background-color: var(--bg-page); color: var(--text-main); min-height: 100vh; }
+        
+        h1, h2, h3 { font-family: 'Poppins', sans-serif; color: var(--primary); }
+
+        .hidden { display: none !important; }
+ 
+        /* TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO / RECUPERAÇÃO) */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--accent);
+            text-align: center;
+        }
+
+        .auth-card .logo {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .auth-card p {
+            color: var(--text-light);
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .auth-switch {
+            margin-top: 20px;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .auth-switch a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .auth-switch a:hover { text-decoration: underline; }
+        
+        .forgot-link {
+            font-size: 13px;
+            color: var(--text-light) !important;
+            font-weight: normal !important;
+        }
+
+        /* HEADER DO DASHBOARD */
+        .topbar {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+ 
+        .logo { font-size: 24px; font-weight: 700; color: #5eead4; text-decoration: none; }
+        
+        .user-profile { display: flex; align-items: center; gap: 15px; font-size: 16px; }
+        .avatar { width: 40px; height: 40px; background-color: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: white; text-transform: uppercase; }
+        
+        .btn-logout {
+            background: transparent;
+            border: 1px solid #64748b;
+            color: #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .btn-logout:hover { background: #cbd5e1; color: var(--primary); }
+
+        /* CONTAINER PRINCIPAL */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+        }
+ 
+        /* CARDS GERAIS */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--accent);
+        }
+ 
+        .card-title { margin-bottom: 25px; font-size: 22px; display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: var(--accent); }
+ 
+        /* FORMULÁRIO DE RESERVA */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--primary); }
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1); }
+        
+        .btn-submit {
+            width: 100%;
+            background-color: var(--accent);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { background-color: #0d9488; }
+ 
+        /* LISTA DE RESERVAS */
+        .reservations-list { display: flex; flex-direction: column; gap: 15px; }
+        
+        .res-item {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: #f8fafc;
+        }
+        
+        .res-item:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        .res-info h4 { font-size: 18px; margin-bottom: 5px; }
+        .res-details { font-size: 14px; color: var(--text-light); display: flex; gap: 15px; flex-wrap: wrap; }
+        .res-details span { display: flex; align-items: center; gap: 5px; }
+        
+        .res-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .res-status {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover {
+            background: var(--danger);
+            color: white;
+        }
+ 
+        /* NOTIFICAÇÃO (TOAST) */
+        #toast {
+            visibility: hidden;
+            min-width: 280px;
+            background-color: #0f172a;
+            color: #5eead4;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 100;
+            right: 30px;
+            bottom: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: visibility 0s, opacity 0.5s linear;
+            opacity: 0;
+        }
+ 
+        #toast.show { visibility: visible; opacity: 1; }
+        .empty-message { color: var(--text-light); text-align: center; font-style: italic; padding: 20px; }
+ 
+        @media (max-width: 768px) {
+            .dashboard-container { grid-template-columns: 1fr; }
+            .topbar { padding: 15px 20px; }
+            .res-item { flex-direction: column; align-items: start; gap: 15px; }
+            .res-actions { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+ 
+    <div id="auth-screen" class="auth-container">
+        
+        <div id="login-card" class="auth-card">
+            <div class="logo"><i class="fa-solid fa-layer-group"></i> SpaceBook</div>
+            <p>Faça login para acessar o painel</p>
+            
+            <form id="login-form">
+                <div class="form-group" style="text-align: left;">
+                    <label for="login-name">Usuário / Equipe</label>
+                    <input type="text" id="login-name" class="form-control" placeholder="Digite seu nome cadastrado" required>
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label for="login-pass">Senha</label>
+                    <input type="password" id="login-pass" class="form-control" placeholder="Digite sua senha" required>
+                </div>
+                <button type="submit" class="btn-submit">Entrar no Sistema</button>
+            </form>
+            <div class="auth-switch">
+                <div>Não tem uma conta? <a href="#" id="link-to-register">Cadastre-se</a></div>
+                <div><a href="#" id="link-to-recover" class="forgot-link">Esqueci minha senha</a></div>
+            </div>
+        </div>
+
+        <div id="register-card" class="auth-card hidden">
+            <div class="logo"><i class="fa-solid fa-layer-group"></i> SpaceBook</div>
+            <p>Crie sua conta para fazer reservas</p>
+            
+            <form id="register-form">
+                <div class="form-group" style="text-align: left;">
+                    <label for="register-name">Nome do Usuário / Equipe</label>
+                    <input type="text" id="register-name" class="form-control" placeholder="Ex: Equipe 3° ADS" required>
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label for="register-pass">Crie uma Senha</label>
+                    <input type="password" id="register-pass" class="form-control" placeholder="Mínimo 4 caracteres" minlength="4" required>
+                </div>
+                <button type="submit" class="btn-submit" style="background-color: var(--primary);">Criar minha Conta</button>
+            </form>
+            <div class="auth-switch">
+                Já tem uma conta? <a href="#" id="link-to-login">Faça Login</a>
+            </div>
+        </div>
+
+        <div id="recover-card" class="auth-card hidden">
+            <div class="logo"><i class="fa-solid fa-layer-group"></i> SpaceBook</div>
+            <p>Recupere seu acesso definindo uma nova senha</p>
+            
+            <form id="recover-form">
+                <div class="form-group" style="text-align: left;">
+                    <label for="recover-name">Confirmar Nome de Usuário / Equipe</label>
+                    <input type="text" id="recover-name" class="form-control" placeholder="Digite seu nome exato cadastrado" required>
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label for="recover-pass">Nova Senha</label>
+                    <input type="password" id="recover-pass" class="form-control" placeholder="Mínimo 4 caracteres" minlength="4" required>
+                </div>
+                <button type="submit" class="btn-submit" style="background-color: var(--danger);">Alterar Senha e Salvar</button>
+            </form>
+            <div class="auth-switch">
+                Lembrou a senha? <a href="#" id="link-recover-to-login">Voltar para o Login</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="dashboard-screen" class="hidden">
+        <header class="topbar">
+            <a href="#" class="logo"><i class="fa-solid fa-layer-group"></i> SpaceBook</a>
+            <div class="user-profile">
+                <span id="user-display-name">Usuário</span>
+                <div id="user-avatar" class="avatar">U</div>
+                <button id="btn-logout" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+            </div>
+        </header>
+     
+        <div class="dashboard-container">
+            <div class="card">
+                <h2 class="card-title"><i class="fa-solid fa-calendar-plus"></i> Nova Reserva</h2>
+                
+                <form id="booking-form">
+                    <div class="form-group">
+                        <label for="space">Ambiente Desejado</label>
+                        <select id="space" class="form-control" required>
+                            <option value="" disabled selected>Selecione um espaço...</option>
+                            <option value="Auditório Principal">Auditório Principal</option>
+                            <option value="Sala de Reunião A">Sala de Reunião A</option>
+                            <option value="Sala de Reunião B">Sala de Reunião B</option>
+                            <option value="Quadra Poliesportiva">Quadra Poliesportiva</option>
+                            <option value="Laboratório de Informática">Laboratório de Informática</option>
+                        </select>
+                    </div>
+     
+                    <div class="form-group">
+                        <label for="date">Data da Reserva</label>
+                        <input type="text" id="date" class="form-control" placeholder="DD/MM/AAAA" maxlength="10" required>
+                    </div>
+     
+                    <div class="form-group">
+                        <label for="time">Horário</label>
+                        <select id="time" class="form-control" required>
+                            <option value="" disabled selected>Selecione o horário...</option>
+                            <option value="08:00 - 10:00">08:00 - 10:00</option>
+                            <option value="10:00 - 12:00">10:00 - 12:00</option>
+                            <option value="13:00 - 15:00">13:00 - 15:00</option>
+                            <option value="15:00 - 17:00">15:00 - 17:00</option>
+                            <option value="18:00 - 20:00">18:00 - 20:00</option>
+                        </select>
+                    </div>
+     
+                    <div class="form-group">
+                        <label for="reason">Motivo / Nome do Evento (Opcional)</label>
+                        <input type="text" id="reason" class="form-control" placeholder="Ex: Reunião de Planejamento">
+                    </div>
+     
+                    <button type="submit" class="btn-submit"><i class="fa-solid fa-check"></i> Confirmar Reserva</button>
+                </form>
+            </div>
+     
+            <div class="card" style="border-top-color: var(--primary);">
+                <h2 class="card-title"><i class="fa-solid fa-list-check"></i> Minhas Reservas</h2>
+                
+                <div class="reservations-list" id="res-list">
+                    </div>
+            </div>
+        </div>
+    </div>
+ 
+    <div id="toast"></div>
+ 
+    <script>
+        const authScreen = document.getElementById('auth-screen');
+        const loginCard = document.getElementById('login-card');
+        const registerCard = document.getElementById('register-card');
+        const recoverCard = document.getElementById('recover-card');
+        const dashboardScreen = document.getElementById('dashboard-screen');
+        
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const recoverForm = document.getElementById('recover-form');
+        const btnLogout = document.getElementById('btn-logout');
+        
+        const form = document.getElementById('booking-form');
+        const resList = document.getElementById('res-list');
+        const toast = document.getElementById('toast');
+        const userDisplayName = document.getElementById('user-display-name');
+        const userAvatar = document.getElementById('user-avatar');
+        const dateInput = document.getElementById('date');
+
+        // Máscara automática para a data ficar sempre no padrão DD/MM/AAAA
+        dateInput.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, '').slice(0, 10);
+            if (v.length >= 5) {
+                v = `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`;
+            } else if (v.length >= 3) {
+                v = `${v.slice(0, 2)}/${v.slice(2)}`;
+            }
+            e.target.value = v;
+        });
+
+        document.getElementById('link-to-register').addEventListener('click', (e) => {
+            e.preventDefault(); hideAllCards(); registerCard.classList.remove('hidden');
+        });
+
+        document.getElementById('link-to-recover').addEventListener('click', (e) => {
+            e.preventDefault(); hideAllCards(); recoverCard.classList.remove('hidden');
+        });
+
+        const backToLoginLinks = ['link-to-login', 'link-recover-to-login'];
+        backToLoginLinks.forEach(id => {
+            document.getElementById(id).addEventListener('click', (e) => {
+                e.preventDefault(); hideAllCards(); loginCard.classList.remove('hidden');
+            });
+        });
+
+        function hideAllCards() {
+            loginCard.classList.add('hidden');
+            registerCard.classList.add('hidden');
+            recoverCard.classList.add('hidden');
+        }
+
+        function showToast(message, isSuccess = true) {
+            toast.innerHTML = isSuccess 
+                ? `<i class="fa-solid fa-circle-check"></i> ${message}`
+                : `<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i> ${message}`;
+            
+            toast.style.color = isSuccess ? "#5eead4" : "#fca5a5";
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function loadReservations() {
+            const currentSession = localStorage.getItem('spacebook_active_user');
+            const allReservations = JSON.parse(localStorage.getItem('spacebook_db_reservations')) || [];
+            
+            const userReservations = allReservations.filter(res => res.user.toLowerCase() === currentSession.toLowerCase());
+            
+            resList.innerHTML = '';
+
+            if (userReservations.length === 0) {
+                resList.innerHTML = '<p class="empty-message">Nenhuma reserva encontrada para sua conta.</p>';
+                return;
+            }
+
+            userReservations.forEach(res => {
+                const html = `
+                    <div class="res-item" style="border-left: 4px solid var(--accent);" data-id="${res.id}">
+                        <div class="res-info">
+                            <h4>${res.space}</h4>
+                            <div class="res-details">
+                                <span><i class="fa-regular fa-calendar"></i> ${res.date}</span>
+                                <span><i class="fa-regular fa-clock"></i> ${res.time}</span>
+                                <span><i class="fa-solid fa-tag"></i> ${res.reason}</span>
+                            </div>
+                        </div>
+                        <div class="res-actions">
+                            <div class="res-status">Confirmado</div>
+                            <button class="btn-cancel"><i class="fa-solid fa-trash"></i> Cancelar</button>
+                        </div>
+                    </div>
+                `;
+                resList.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function checkLoginState() {
+            const currentSession = localStorage.getItem('spacebook_active_user');
+            if (currentSession) {
+                userDisplayName.textContent = currentSession;
+                userAvatar.textContent = currentSession.charAt(0);
+                authScreen.classList.add('hidden');
+                dashboardScreen.classList.remove('hidden');
+                loadReservations();
+            } else {
+                authScreen.classList.remove('hidden');
+                dashboardScreen.classList.add('hidden');
+            }
+        }
+
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('register-name').value.trim();
+            const password = document.getElementById('register-pass').value;
+
+            let database = JSON.parse(localStorage.getItem('spacebook_db_users')) || [];
+            const userExists = database.some(user => user.name.toLowerCase() === username.toLowerCase());
+
+            if (userExists) {
+                showToast('Este usuário/equipe já está cadastrado!', false);
+                return;
+            }
+
+            database.push({ name: username, pass: password });
+            localStorage.setItem('spacebook_db_users', JSON.stringify(database));
+
+            showToast('Conta criada com sucesso! Faça login.', true);
+            registerForm.reset();
+            hideAllCards();
+            loginCard.classList.remove('hidden');
+        });
+
+        recoverForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('recover-name').value.trim();
+            const newPassword = document.getElementById('recover-pass').value;
+
+            let database = JSON.parse(localStorage.getItem('spacebook_db_users')) || [];
+            const userIndex = database.findIndex(user => user.name.toLowerCase() === usernameInput.toLowerCase());
+
+            if (userIndex === -1) {
+                showToast('Usuário/Equipe não encontrado!', false);
+                return;
+            }
+
+            database[userIndex].pass = newPassword;
+            localStorage.setItem('spacebook_db_users', JSON.stringify(database));
+
+            showToast('Senha atualizada com sucesso! Faça login.', true);
+            recoverForm.reset();
+            hideAllCards();
+            loginCard.classList.remove('hidden');
+        });
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('login-name').value.trim();
+            const passwordInput = document.getElementById('login-pass').value;
+
+            let database = JSON.parse(localStorage.getItem('spacebook_db_users')) || [];
+            const foundUser = database.find(user => 
+                user.name.toLowerCase() === usernameInput.toLowerCase() && user.pass === passwordInput
+            );
+
+            if (foundUser) {
+                localStorage.setItem('spacebook_active_user', foundUser.name);
+                loginForm.reset();
+                checkLoginState();
+                showToast(`Bem-vindo de volta, ${foundUser.name}!`);
+            } else {
+                showToast('Usuário ou senha incorretos!', false);
+            }
+        });
+
+        btnLogout.addEventListener('click', () => {
+            localStorage.removeItem('spacebook_active_user');
+            checkLoginState();
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+ 
+            const space = document.getElementById('space').value;
+            const date = dateInput.value;
+            const time = document.getElementById('time').value;
+            let reason = document.getElementById('reason').value.trim();
+            const currentSession = localStorage.getItem('spacebook_active_user');
+            
+            // Validar se a data foi digitada por completo
+            if (date.length < 10) {
+                showToast('Por favor, insira uma data válida no formato DD/MM/AAAA', false);
+                return;
+            }
+
+            if(!reason) reason = "Uso Padrão";
+ 
+            let allReservations = JSON.parse(localStorage.getItem('spacebook_db_reservations')) || [];
+
+            const isConflict = allReservations.some(res => 
+                res.space === space && 
+                res.date === date && 
+                res.time === time
+            );
+
+            if (isConflict) {
+                showToast('Este espaço já está reservado nesta data e horário!', false);
+                return;
+            }
+
+            const newReservation = {
+                id: Date.now(),
+                user: currentSession,
+                space: space,
+                date: date,
+                time: time,
+                reason: reason
+            };
+
+            allReservations.unshift(newReservation);
+            localStorage.setItem('spacebook_db_reservations', JSON.stringify(allReservations));
+
+            form.reset();
+            loadReservations();
+            showToast('Reserva realizada com sucesso!', true);
+        });
+
+        resList.addEventListener('click', function(e) {
+            if (e.target.closest('.btn-cancel')) {
+                const resItem = e.target.closest('.res-item');
+                const resId = parseInt(resItem.getAttribute('data-id'));
+
+                let allReservations = JSON.parse(localStorage.getItem('spacebook_db_reservations')) || [];
+                allReservations = allReservations.filter(res => res.id !== resId);
+                localStorage.setItem('spacebook_db_reservations', JSON.stringify(allReservations));
+
+                loadReservations();
+                showToast('Reserva cancelada com sucesso!', true);
+            }
+        });
+ 
+        checkLoginState();
+    </script>
+</body>
+</html>
